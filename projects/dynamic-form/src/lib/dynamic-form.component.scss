@@ -1,0 +1,77 @@
+.scroll-off {
+  overflow: hidden !important;
+  padding: 0.9375rem;
+}
+
+.mat-form-field-flex {
+  height: 100%;
+}
+
+.title-group {
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
+  background-color: var(--dynamic-background-color);
+}
+
+.grid-container {
+  display: grid;
+  gap: 10px;
+}
+
+.col-span-1 {
+  grid-column: span 1;
+}
+
+.col-span-2 {
+  grid-column: span 2;
+}
+
+.col-span-3 {
+  grid-column: span 3;
+}
+
+.label-custom {
+  margin-top: -10px;
+  font: 400 11px / 18px var(--font);
+}
+
+:host ::ng-deep {
+  .p-multiselect {
+    width: 100%;
+    max-width: 100%;
+    font-size: small;
+    margin-bottom: 15px;
+  }
+
+  .p-multiselect-label {
+    display: flex;
+    flex-wrap: wrap;
+    min-height: 40px;
+    padding: 4px;
+  }
+
+  .p-multiselect-token {
+    margin: 2px;
+  }
+}
+
+.p-dropdown {
+  width: 100%;
+}
+
+:host ::ng-deep {
+  .p-dropdown {
+    height: 48px;
+    margin-top: 3px;
+  }
+  .p-dropdown .p-dropdown-label {
+    font-size: 12px;
+    margin-top: 6px;
+    font-weight: 500;
+    color: black;
+    font-family: var(--font);
+  }
+}

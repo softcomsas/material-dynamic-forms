@@ -1,0 +1,388 @@
+<form [formGroup]="form" class="my-2" (ngSubmit)="onSubmit()">
+  <div class="flex items-center" mat-dialog-title *ngIf="isModal">
+    <h2 class="headline m-0 flex-auto">{{ title }}</h2>
+  </div>
+  <mat-divider *ngIf="isModal" class="-mx-6 text-border"></mat-divider>
+
+  <mat-dialog-content class="flex flex-col">
+    <div *ngFor="let groups of fieldGroups">
+      <div mat-dialog-title *ngIf="groups.title">
+        <h6 class="title-group m-0 flex-auto">{{ groups.title }}</h6>
+      </div>
+      <div
+        class="grid-container"
+        [style.gridTemplateColumns]="getGridColumns(groups.countColumns || 1)"
+      >
+        <div
+          *ngFor="let field of groups.fields"
+          [class]="getColSpanClass(field.colspan)"
+        >
+          <div [ngSwitch]="field.type" *ngIf="field.visible">
+            <!-- INPUT -->
+            <mat-form-field
+              *ngSwitchCase="eDataType.input"
+              appearance="outline"
+              class="w-full"
+              [attr.style]="
+                field.background
+                  ? '--dynamic-background-color: ' + field.background
+                  : 'transparent'
+              "
+            >
+              <mat-label>{{ field.label }}</mat-label>
+              <input
+                [type]="field.controlType!"
+                matInput
+                [placeholder]="field.placeholder!"
+                [formControlName]="field.name!"
+                [value]="field.value ? field.value : ''"
+                (blur)="emitEvent(field)"
+              />
+              <mat-icon
+                [svgIcon]="field.icon!"
+                class="icon-sm"
+                matSuffix
+              ></mat-icon>
+
+              <!-- MENSAJES DE ERROR -->
+              <mat-error
+                *ngIf="
+                  form.controls[field.name]?.invalid &&
+                  (form.controls[field.name]?.touched ||
+                    form.controls[field.name]?.dirty)
+                "
+              >
+                {{ getErrorMessage(field.name) }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- SELECT -->
+            <mat-form-field
+              *ngSwitchCase="eDataType.select"
+              appearance="outline"
+              class="w-full"
+              [attr.style]="
+                field.background
+                  ? '--dynamic-background-color: ' + field.background
+                  : 'transparent'
+              "
+            >
+              <mat-label>{{ field.label }}</mat-label>
+              <mat-select
+                [formControlName]="field.name!"
+                (selectionChange)="emitEvent(field, $event)"
+              >
+                <mat-option *ngIf="field.allOption" [value]="-1"
+                  >TODOS</mat-option
+                >
+                <mat-option
+                  *ngFor="let option of field.options"
+                  [value]="option.key"
+                >
+                  {{ option.value }}
+                </mat-option>
+              </mat-select>
+
+              <!-- MENSAJES DE ERROR -->
+              <mat-error
+                *ngIf="
+                  form.controls[field.name]?.invalid &&
+                  (form.controls[field.name]?.touched ||
+                    form.controls[field.name]?.dirty)
+                "
+              >
+                {{ getErrorMessage(field.name) }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- SELECT WITH AUTOCOMPLETE -->
+            <div
+              *ngSwitchCase="eDataType.select_autocomplete"
+              style="margin-bottom: 15px"
+            >
+              <h2 *ngIf="field.label" class="label-custom">
+                {{ field.label }}
+              </h2>
+              <p-dropdown
+                [options]="field.options!"
+                [formControlName]="field.name"
+                [filter]="true"
+                [showClear]="true"
+                [placeholder]="field.placeholder || 'Seleccione'"
+                (onChange)="emitEvent(field, $event)"
+                optionLabel="value"
+                optionValue="key"
+                appendTo="body"
+                filterBy="value"
+              >
+              </p-dropdown>
+              <!-- MENSAJES DE ERROR -->
+              <mat-error
+                *ngIf="
+                  form.controls[field.name]?.invalid &&
+                  (form.controls[field.name]?.touched ||
+                    form.controls[field.name]?.dirty)
+                "
+              >
+                {{ getErrorMessage(field.name) }}
+              </mat-error>
+            </div>
+
+            <!-- INPUT AUTOCOMPLETE -->
+            <div
+              *ngSwitchCase="eDataType.input_autocomplete"
+              style="margin-bottom: 15px"
+            >
+              <h2 *ngIf="field.label" class="label-custom">
+                {{ field.label }}
+              </h2>
+              <span class="p-input-icon-right w-full mr-2">
+                <i class="pi pi-search"></i>
+                <p-autoComplete
+                  [formControlName]="field.name"
+                  [placeholder]="field.placeholder || ''"
+                  [suggestions]="field.inputAutoComplete?.suggestions || []"
+                  [showClear]="field.inputAutoComplete?.showClear || true"
+                  (completeMethod)="
+                    field.inputAutoComplete?.onCompleteMethod($event)
+                  "
+                  (onClear)="field.inputAutoComplete?.onClear($event)"
+                  (onSelect)="field.inputAutoComplete?.onSelect($event)"
+                  field="value"
+                  optionValue="key"
+                  styleClass="w-full"
+                  inputStyleClass="w-full p-inputtext"
+                  appendTo="body"
+                >
+                </p-autoComplete>
+              </span>
+              <!-- MENSAJES DE ERROR -->
+              <mat-error
+                *ngIf="
+                  form.controls[field.name]?.invalid &&
+                  (form.controls[field.name]?.touched ||
+                    form.controls[field.name]?.dirty)
+                "
+              >
+                {{ getErrorMessage(field.name) }}
+              </mat-error>
+            </div>
+
+            <!-- SELECT-CHIPS -->
+            <div *ngSwitchCase="eDataType.select_chips">
+              <h2 class="label-custom">{{ field.label }}</h2>
+              <p-multiSelect
+                [options]="field.options!"
+                [formControlName]="field.name"
+                [defaultLabel]="field.placeholder || ''"
+                (onChange)="emitEvent(field, $event)"
+                optionLabel="value"
+                optionValue="key"
+                display="chip"
+                appendTo="body"
+              ></p-multiSelect>
+              <!-- MENSAJES DE ERROR -->
+              <mat-error
+                *ngIf="
+                  form.controls[field.name]?.invalid &&
+                  (form.controls[field.name]?.touched ||
+                    form.controls[field.name]?.dirty)
+                "
+              >
+                {{ getErrorMessage(field.name) }}
+              </mat-error>
+            </div>
+
+            <!-- DATE -->
+            <ng-container *ngSwitchCase="eDataType.date">
+              <ng-container
+                *ngIf="!field.multiple; then singleDate; else rangeDate"
+              >
+              </ng-container>
+            </ng-container>
+
+            <!-- DATE-SINGLE -->
+            <ng-template #singleDate>
+              <mat-form-field
+                appearance="outline"
+                class="w-full"
+                [attr.style]="
+                  field.background
+                    ? '--dynamic-background-color: ' + field.background
+                    : 'transparent'
+                "
+              >
+                <mat-label style="font-size: 12px">{{ field.label }}</mat-label>
+                <input
+                  [matDatepicker]="datepickerRef"
+                  [formControlName]="field.name!"
+                  matInput
+                  (dateChange)="emitEvent(field, $event)"
+                  [min]="field.minDate || null"
+                  [max]="field.maxDate || null"
+                  [matDatepickerFilter]="field.dateFilterFn!"
+                />
+                <mat-datepicker-toggle
+                  [for]="datepickerRef"
+                  class="block"
+                  matSuffix
+                ></mat-datepicker-toggle>
+                <mat-datepicker
+                  #datepickerRef
+                  class="end-position"
+                ></mat-datepicker>
+
+                <!-- MENSAJES DE ERROR -->
+                <mat-error
+                  *ngIf="
+                    form.controls[field.name]?.invalid &&
+                    (form.controls[field.name]?.touched ||
+                      form.controls[field.name]?.dirty)
+                  "
+                >
+                  {{ getErrorMessage(field.name) }}
+                </mat-error>
+              </mat-form-field>
+            </ng-template>
+
+            <!-- DATE-RANGE -->
+            <ng-template #rangeDate>
+              <mat-form-field
+                appearance="outline"
+                class="w-full"
+                [attr.style]="
+                  field.background
+                    ? '--dynamic-background-color: ' + field.background
+                    : 'transparent'
+                "
+              >
+                <mat-label>{{ field.label }}</mat-label>
+                <mat-date-range-input [rangePicker]="picker">
+                  <input
+                    matStartDate
+                    placeholder="Fecha Inicial"
+                    [formControlName]="field.name + 'start'"
+                    (dateChange)="emitEvent(field, $event)"
+                  />
+                  <input
+                    matEndDate
+                    placeholder="Fecha Final"
+                    [formControlName]="field.name + 'end'"
+                  />
+                </mat-date-range-input>
+
+                <mat-datepicker-toggle
+                  matIconSuffix
+                  [for]="picker"
+                ></mat-datepicker-toggle>
+                <mat-date-range-picker #picker></mat-date-range-picker>
+
+                <!-- MENSAJES DE ERROR -->
+                <mat-error
+                  *ngIf="
+                    form.controls[field.name]?.invalid &&
+                    (form.controls[field.name]?.touched ||
+                      form.controls[field.name]?.dirty)
+                  "
+                >
+                  {{ getErrorMessage(field.name) }}
+                </mat-error>
+              </mat-form-field>
+            </ng-template>
+
+            <!-- TEXT-AREA -->
+            <mat-form-field
+              [attr.style]="
+                field.background
+                  ? '--dynamic-background-color: ' + field.background
+                  : 'transparent'
+              "
+              *ngSwitchCase="eDataType.tex_area"
+              appearance="outline"
+              class="w-full h-full"
+            >
+              <mat-label>{{ field.label }}</mat-label>
+              <textarea
+                matInput
+                #observaciones
+                [name]="field.name!"
+                [placeholder]="field.placeholder!"
+                maxlength="250"
+                onkeypress="if (this.value.length > 250) { return false; }"
+                [formControlName]="field.name!"
+                rows="3"
+                (blur)="emitEvent(field)"
+              >
+              </textarea>
+
+              <!-- MENSAJES DE ERROR -->
+              <mat-error
+                *ngIf="
+                  form.controls[field.name]?.invalid &&
+                  (form.controls[field.name]?.touched ||
+                    form.controls[field.name]?.dirty)
+                "
+              >
+                {{ getErrorMessage(field.name) }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Tipo checkbox-->
+            <mat-checkbox
+              *ngSwitchCase="eDataType.checkbox"
+              [formControlName]="field.name!"
+              (change)="emitEvent(field)"
+              color="primary"
+            >
+              {{ field.label }}
+            </mat-checkbox>
+
+            <!-- Button-Toggle -->
+            <div *ngSwitchCase="eDataType.button_toggle">
+              <span class="label-chip">{{ field.label }}</span>
+              <mat-button-toggle-group
+                [attr.style]="
+                  field.background
+                    ? '--dynamic-background-color: ' + field.background
+                    : 'transparent'
+                "
+                (change)="emitEvent(field, $event)"
+                [(value)]="field.value"
+              >
+                <mat-button-toggle
+                  *ngFor="let option of field.options"
+                  [value]="option.key"
+                  >{{ option.value }}</mat-button-toggle
+                >
+              </mat-button-toggle-group>
+              <!-- MENSAJES DE ERROR -->
+              <mat-error
+                *ngIf="
+                  form.controls[field.name]?.invalid &&
+                  (form.controls[field.name]?.touched ||
+                    form.controls[field.name]?.dirty)
+                "
+              >
+                {{ getErrorMessage(field.name) }}
+              </mat-error>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions style="justify-content: space-between" *ngIf="isModal">
+    <button
+      style="margin-right: 1rem"
+      mat-button
+      mat-dialog-close
+      type="button"
+    >
+      Cancelar
+    </button>
+    <button color="primary" mat-flat-button [disabled]="form.invalid">
+      {{ titleButton }}
+    </button>
+  </mat-dialog-actions>
+</form>
