@@ -218,7 +218,7 @@ Asegúrate de tener configurado tu usuario en npm y permisos para publicar.
 
 ## Licencia 📄
 
-MIT
+Este proyecto está licenciado bajo la licencia MIT. Véase el archivo [LICENSE](LICENSE) para más detalles.
 
 ---
 
