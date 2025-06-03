@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "dynamic-form": {
+    "material-dynamic-forms": {
       "projectType": "library",
       "root": "projects/dynamic-form",
       "sourceRoot": "projects/dynamic-form/src",
